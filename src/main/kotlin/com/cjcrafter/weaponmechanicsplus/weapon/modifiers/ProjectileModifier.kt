@@ -5,6 +5,8 @@
 
 package com.cjcrafter.weaponmechanicsplus.weapon.modifiers
 
+import com.cjcrafter.weaponmechanicsplus.weapon.guidedprojectile.GuidedProjectile
+import com.cjcrafter.weaponmechanicsplus.weapon.homingprojectile.HomingProjectile
 import me.deecaad.core.file.*
 import me.deecaad.weaponmechanics.weapon.projectile.weaponprojectile.Bouncy
 import me.deecaad.weaponmechanics.weapon.projectile.weaponprojectile.ProjectileSettings
@@ -38,6 +40,10 @@ class ProjectileModifier : Serializer<ProjectileModifier> {
     // below are used.
     var overrideBouncy: Bouncy? = null
     var maximumBounceAmount: IntegerModifier? = null
+
+    // The new features requested by CJ (he said it would be fun so blame him if something goes haywire! :) )
+    var homingProjectile : HomingProjectile? = null
+    var guidedProjectile : GuidedProjectile? = null
 
     /**
      * Default constructor for serializer
@@ -95,6 +101,15 @@ class ProjectileModifier : Serializer<ProjectileModifier> {
         val overrideBouncy: Bouncy? = data.of("Override_Bouncy").serialize(Bouncy::class.java).getOrNull()
         val maximumBounceAmount = data.of("Maximum_Bounce_Amount").serialize(IntegerModifier::class.java).getOrNull()
 
+        // These aren't "physics" modifiers, but projectile-behavior scripts
+        val guided = if (data.has("Guided_Projectile")) {
+            data.of("Guided_Projectile").serialize(GuidedProjectile::class.java).getOrNull()
+        } else null
+
+        val homing = if (data.has("Homing_Projectiles")) {
+            data.of("Homing_Projectiles").serialize(HomingProjectile::class.java).getOrNull()
+        } else null
+
         return ProjectileModifier(
             overrideProjectileSettings,
             gravity,
@@ -109,6 +124,9 @@ class ProjectileModifier : Serializer<ProjectileModifier> {
             maximumThroughAmount,
             overrideBouncy,
             maximumBounceAmount
-        )
+        ).also {
+            it.guidedProjectile = guided
+            it.homingProjectile = homing
+        }
     }
 }

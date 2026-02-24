@@ -10,6 +10,10 @@ import com.cjcrafter.weaponmechanicsplus.listeners.*
 import com.cjcrafter.weaponmechanicsplus.placeholders.ArmorMechanicsPlaceholderListener
 import com.cjcrafter.weaponmechanicsplus.placeholders.WeaponMechanicsPlaceholderListener
 import com.cjcrafter.weaponmechanicsplus.weapon.firemode.FireModeTriggerListener
+import com.cjcrafter.weaponmechanicsplus.weapon.guidedprojectile.GuidedProjectileRegistry
+import com.cjcrafter.weaponmechanicsplus.weapon.guidedprojectile.GuidedProjectileScriptManager
+import com.cjcrafter.weaponmechanicsplus.weapon.homingprojectile.HomingProjectileScriptManager
+import com.cjcrafter.weaponmechanicsplus.weapon.homingprojectile.HomingTargetRegistry
 import com.cjcrafter.weaponmechanicsplus.weapon.listeners.AttractMobsListener
 import com.cjcrafter.weaponmechanicsplus.weapon.modifiers.attachments.Attachment
 import me.deecaad.core.MechanicsPlugin
@@ -30,9 +34,9 @@ import me.deecaad.core.mechanics.targeters.Targeter
 import me.deecaad.core.placeholder.PlaceholderHandler
 import me.deecaad.core.placeholder.PlaceholderHandlers
 import me.deecaad.weaponmechanics.WeaponMechanics
+import me.deecaad.weaponmechanics.weapon.projectile.ProjectileSpawner
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.plugin.Plugin
 import java.io.IOException
 import java.util.concurrent.CompletableFuture
 import java.util.jar.JarFile
@@ -41,6 +45,20 @@ class WeaponMechanicsPlus : MechanicsPlugin(bStatsId = 16382) {
 
     lateinit var attachmentConfiguration: Configuration
         private set
+
+    private var registeredSpawner: ProjectileSpawner? = null
+    private val guidedScriptManager = GuidedProjectileScriptManager(this)
+    private val homingScriptManager = HomingProjectileScriptManager(this)
+
+    private fun ensureProjectileManagersRegistered() {
+        val spawner = WeaponMechanics.getInstance().projectileSpawner
+        if (registeredSpawner === spawner) return
+
+        spawner.addScriptManager(guidedScriptManager)
+        spawner.addScriptManager(homingScriptManager)
+
+        registeredSpawner = spawner
+    }
 
     init {
         INSTANCE = this
@@ -103,6 +121,15 @@ class WeaponMechanicsPlus : MechanicsPlugin(bStatsId = 16382) {
             registerEvents(AttractMobsListener(), plugin)
             registerEvents(createWeaponMechanicsReloadListener(), plugin)
 
+            // A tiny delay so that WeaponMechanics finishes init/serialization
+            // 5 ticks should be sufficient
+            foliaScheduler.global().runDelayed(Runnable {
+                ensureProjectileManagersRegistered()
+            }, 5L)
+
+            registerEvents(GuidedProjectileRegistry(this@WeaponMechanicsPlus), plugin)
+            registerEvents(HomingTargetRegistry(this@WeaponMechanicsPlus), plugin)
+
             if (getPlugin("ArmorMechanics") != null) {
                 registerEvents(ArmorModifierListeners(), plugin)
                 registerEvents(ArmorGenerateListener(), plugin)
@@ -140,8 +167,7 @@ class WeaponMechanicsPlus : MechanicsPlugin(bStatsId = 16382) {
                 weaponHandler.addTriggerListener(FireModeTriggerListener())
 
                 // Register projectile script manager
-                val projectilesRunnable = WeaponMechanics.getInstance().getProjectileSpawner()
-                projectilesRunnable.addScriptManager(ProjectileScriptManager(this@WeaponMechanicsPlus))
+                ensureProjectileManagersRegistered()
             }
         }
     }
