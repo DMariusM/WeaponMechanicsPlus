@@ -7,6 +7,7 @@ armorMechanics = "4.2.0"
 mechanicsCore = "4.2.0-SNAPSHOT"
 mythicMobs = "5.8.2"
 weaponMechanics = "4.2.0-SNAPSHOT"
+packetEvents = "2.8.0"
 
 # Shaded dependencies
 bstats = "3.1.0"
@@ -23,6 +24,7 @@ armorMechanics = { module = "com.cjcrafter:armormechanics", version.ref = "armor
 mechanicsCore   = { module = "com.cjcrafter:mechanicscore", version.ref = "mechanicsCore" }
 mythicMobs      = { module = "io.lumine:Mythic-Dist", version.ref = "mythicMobs" }
 weaponMechanics = { module = "com.cjcrafter:weaponmechanics", version.ref = "weaponMechanics" }
+packetEvents    = { module = "com.github.retrooper:packetevents-spigot", version.ref = "packetEvents" }
 
 # Shaded dependencies
 bstats                   = { module = "org.bstats:bstats-bukkit", version.ref = "bstats" }

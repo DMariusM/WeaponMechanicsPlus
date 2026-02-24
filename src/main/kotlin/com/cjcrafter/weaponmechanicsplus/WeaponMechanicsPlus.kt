@@ -12,6 +12,7 @@ import com.cjcrafter.weaponmechanicsplus.placeholders.WeaponMechanicsPlaceholder
 import com.cjcrafter.weaponmechanicsplus.weapon.firemode.FireModeTriggerListener
 import com.cjcrafter.weaponmechanicsplus.weapon.listeners.AttractMobsListener
 import com.cjcrafter.weaponmechanicsplus.weapon.modifiers.attachments.Attachment
+import com.cjcrafter.weaponmechanicsplus.weapon.thermal.ThermalScopeManager
 import me.deecaad.core.MechanicsPlugin
 import me.deecaad.core.events.QueueSerializerEvent
 import me.deecaad.core.file.Configuration
@@ -102,6 +103,10 @@ class WeaponMechanicsPlus : MechanicsPlugin(bStatsId = 16382) {
             registerEvents(WeaponGenerateListener(), plugin)
             registerEvents(AttractMobsListener(), plugin)
             registerEvents(createWeaponMechanicsReloadListener(), plugin)
+
+            val thermalManager = ThermalScopeManager(this@WeaponMechanicsPlus)
+            registerEvents(thermalManager, plugin)
+            registerEvents(ThermalScopeListener(thermalManager), plugin)
 
             if (getPlugin("ArmorMechanics") != null) {
                 registerEvents(ArmorModifierListeners(), plugin)

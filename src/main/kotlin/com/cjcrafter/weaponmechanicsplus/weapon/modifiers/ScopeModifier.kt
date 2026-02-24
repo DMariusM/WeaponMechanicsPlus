@@ -6,9 +6,9 @@
 package com.cjcrafter.weaponmechanicsplus.weapon.modifiers
 
 import me.deecaad.core.file.*
-import me.deecaad.core.utils.EnumUtil
 import com.cjcrafter.weaponmechanicsplus.weapon.modifiers.util.*
 import com.cjcrafter.weaponmechanicsplus.weapon.modifiers.util.MechanicsModifier.Companion.serializeMechanicsModifier
+import com.cjcrafter.weaponmechanicsplus.weapon.thermal.ThermalScopeSettings
 import me.deecaad.core.file.simple.DoubleSerializer
 import me.deecaad.core.file.simple.EnumValueSerializer
 import java.util.*
@@ -21,6 +21,7 @@ class ScopeModifier : Serializer<ScopeModifier> {
     var isPumpkinOverlay: Boolean? = null
     var zoomStacking: List<DoubleModifier?> = listOf()
     var mechanicsModifier: MechanicsModifier? = null
+    var thermalScope: ThermalScopeSettings? = null
 
     /**
      * Default constructor for serializer
@@ -53,6 +54,13 @@ class ScopeModifier : Serializer<ScopeModifier> {
             .requireAllPreviousArgs()
             .assertList()
 
+        val thermal: ThermalScopeSettings? =
+            if (data.has("Thermal_Scope")) {
+                val thermalNode = data.move("Thermal_Scope")
+                val enabled = !thermalNode.has("Enabled") || thermalNode.of("Enabled").getBool().orElse(true)
+                if (enabled) ThermalScopeSettings().serialize(thermalNode) else null
+            } else null
+
         val zoomStacking: MutableList<DoubleModifier> = ArrayList()
         for (split in splits) {
             val operation = (split[0].get() as List<Operation>).first()
@@ -62,6 +70,6 @@ class ScopeModifier : Serializer<ScopeModifier> {
 
         val mechanicsModifier = data.serializeMechanicsModifier()
 
-        return ScopeModifier(zoomAmount, isNightVision, isPumpkinOverlay, zoomStacking, mechanicsModifier)
+        return ScopeModifier(zoomAmount, isNightVision, isPumpkinOverlay, zoomStacking, mechanicsModifier).also {it.thermalScope = thermal }
     }
 }

@@ -35,6 +35,7 @@ repositories {
     maven(url = "https://central.sonatype.com/repository/maven-snapshots/") // MechanicsCore Snapshots
     maven(url = "https://repo.papermc.io/repository/maven-public/") // Paper
     maven(url = "https://mvn.lumine.io/repository/maven-public/") // MythicMobs
+    maven(url = "https://repo.codemc.io/repository/maven-releases/") // PacketEvents
 }
 
 dependencies {
@@ -43,6 +44,7 @@ dependencies {
     compileOnly(libs.paper)
     compileOnly(libs.mechanicsCore)
     compileOnly(libs.weaponMechanics)
+    compileOnly(libs.packetEvents)
 
     // External "hooks" or plugins that we might interact with
     compileOnly(libs.mythicMobs)
