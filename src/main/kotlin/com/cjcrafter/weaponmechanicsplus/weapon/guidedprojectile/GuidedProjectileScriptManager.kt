@@ -20,6 +20,6 @@ class GuidedProjectileScriptManager(plugin: Plugin) : ProjectileScriptManager(pl
         val ctx = GuidedContextHolder.consumeOne(shooter.uniqueId) ?: return
 
         projectile.setTag("wmp_guided", "1")
-        projectile.addProjectileScript(GuidedProjectileScript(plugin, projectile, ctx.settings))
+        projectile.addProjectileScript(GuidedProjectileScript(plugin, projectile, ctx.settings, ctx))
     }
 }

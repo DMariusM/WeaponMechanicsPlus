@@ -14,21 +14,27 @@ import kotlin.math.abs
 class GuidedProjectile(
     val enabled: Boolean,
     val maximumCurvePerTick: Double,
+    val maximumGuidedTicks: Int,
     val maxRange: Double,
     val updateInterval: Int,
     val useRayTrace: Boolean,
     val ignorePassableBlocks: Boolean,
     val raySize: Double,
+    val requireHoldingWeapon: Boolean,
+    val controlLossMode: ControlLossMode,
 ) : Serializer<GuidedProjectile> {
 
     constructor() : this(
         enabled = true,
         maximumCurvePerTick = 0.12,
+        maximumGuidedTicks = 400,
         maxRange = 96.0,
         updateInterval = 1,
         useRayTrace = true,
         ignorePassableBlocks = true,
-        raySize = 0.0
+        raySize = 0.0,
+        requireHoldingWeapon = false,
+        controlLossMode = ControlLossMode.PAUSE
     )
 
     override fun getKeyword(): String = "Guided_Projectile"
@@ -40,6 +46,10 @@ class GuidedProjectile(
         val maxCurve = data.of("Maximum_Curve_Per_Tick")
             .assertRange(0.0, Math.PI)
             .getDouble().orElse(0.12)
+
+        val maximumGuidedTicks = data.of("Maximum_Guided_Ticks")
+            .assertRange(0, 10000)
+            .getInt().orElse(400)
 
         val maxRange = data.of("Max_Range")
             .assertRange(1.0, 10000.0)
@@ -56,14 +66,24 @@ class GuidedProjectile(
             .assertRange(0.0, 5.0)
             .getDouble().orElse(0.0)
 
+        val requireHoldingWeapon = data.of("Require_Holding_Weapon")
+            .getBool().orElse(false)
+
+        val controlLossMode = data.of("Control_Loss_Mode")
+            .getEnum(ControlLossMode::class.java)
+            .orElse(ControlLossMode.PAUSE)
+
         return GuidedProjectile(
             enabled = enabled,
             maximumCurvePerTick = maxCurve,
             maxRange = maxRange,
+            maximumGuidedTicks = maximumGuidedTicks,
             updateInterval = interval,
             useRayTrace = useRay,
             ignorePassableBlocks = ignorePassable,
-            raySize = raySize
+            raySize = raySize,
+            requireHoldingWeapon = requireHoldingWeapon,
+            controlLossMode = controlLossMode
         )
     }
 
