@@ -52,7 +52,7 @@ class ThermalScopeManager(private val plugin: WeaponMechanicsPlus) : Listener {
         val id = viewer.uniqueId
         settingsByViewer[id] = settings
 
-        // don’t use computeIfAbsent because runAtFixedRate returns nullable
+        // Don’t use computeIfAbsent because runAtFixedRate returns nullable
         if (tasks.containsKey(id)) return
 
         val period = settings.tickInterval.coerceAtLeast(1).toLong()
@@ -203,7 +203,7 @@ class ThermalScopeManager(private val plugin: WeaponMechanicsPlus) : Listener {
                 // Ignore metadata we just sent ourselves
                 if (suppressCapture[viewerId]?.contains(eid) == true) return
 
-                // Capture baseline (your existing code)
+                // Capture baseline
                 for (data in wrapper.entityMetadata) {
                     if (data.index == 0 && data.type == EntityDataTypes.BYTE) {
                         val b = data.value as Byte
@@ -252,9 +252,9 @@ class ThermalScopeManager(private val plugin: WeaponMechanicsPlus) : Listener {
     ): Boolean {
         if (maxDistance <= 0.0) return false
 
-        // If no filter configured, simplest "walls block" behavior
+        // No block filter configured -> thermal ignores blocks by default
         if (blockFilter == null) {
-            return world.rayTraceBlocks(start, dir, maxDistance, FluidCollisionMode.NEVER, true)?.hitBlock != null
+            return false
         }
 
         var cursor = start.clone()
@@ -268,12 +268,12 @@ class ThermalScopeManager(private val plugin: WeaponMechanicsPlus) : Listener {
             val hitPos = hit.hitPosition.toLocation(world)
 
             val travelled = hitPos.distance(cursor)
-            if (travelled <= 0.0 || travelled.isNaN()) return true // safety => treat as blocked
+            if (travelled <= 0.0 || travelled.isNaN()) return true
 
-            // If this block "blocks thermal", we are occluded
+            // If this block is considered "blocking thermal", we are occluded
             if (blockFilter.isWhitelisted(mat)) return true
 
-            // Otherwise this block is a "transparent exception" -> skip past it and keep tracing
+            // Otherwise skip past it and continue tracing
             val step = 0.05
             cursor = hitPos.add(dir.clone().multiply(step))
             remaining -= (travelled + step)
