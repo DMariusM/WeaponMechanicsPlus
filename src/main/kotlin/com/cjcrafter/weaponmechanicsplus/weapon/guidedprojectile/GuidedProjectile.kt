@@ -39,6 +39,8 @@ class GuidedProjectile(
 
     override fun getKeyword(): String = "Guided_Projectile"
 
+    override fun getParentKeywords(): List<String> = listOf("Projectile")
+
     @Throws(SerializerException::class)
     override fun serialize(data: SerializeData): GuidedProjectile {
         val enabled = data.of("Enabled").getBool().orElse(true)

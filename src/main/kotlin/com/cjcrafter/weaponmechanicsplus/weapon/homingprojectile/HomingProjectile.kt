@@ -36,6 +36,8 @@ class HomingProjectile(
 
     override fun getKeyword(): String = "Homing_Projectiles"
 
+    override fun getParentKeywords(): List<String> = listOf("Projectile")
+
     override fun serialize(data: SerializeData): HomingProjectile {
         val enabled = data.of("Enabled").getBool().orElse(true)
 
