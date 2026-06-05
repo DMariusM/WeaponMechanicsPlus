@@ -73,19 +73,25 @@ class Attachment : ModifierBase {
         val whitelist = if (isWeapon) weaponWhitelist else armorWhitelist
         if (whitelist == null || !whitelist.isWhitelisted(itemTitle)) return false
 
-        // If there are no attachments currently on the weapon, then we can attach
-        val attached = WeaponMechanicsPlusAPI.getAttachments(item) ?: return true
+        val attached = WeaponMechanicsPlusAPI.getAttachments(item).orEmpty()
+        val attachedTitles = HashSet<String>(attached.size)
         var duplicateCount = 0
+
         for (attachment in attached) {
+            attachedTitles.add(attachment.attachmentTitle)
+
             if (attachment === this) {
                 duplicateCount++
                 continue
             }
 
             // Some attachments are not compatible with each other
-            if (attachmentRequireList.isNotEmpty() && !attachmentRequireList.contains(attachment.attachmentTitle)) return false
             if (attachmentDenyList.contains(attachment.attachmentTitle)) return false
         }
+
+        // Every required attachment must already be attached. Unrelated
+        // attachments do not affect this requirement check
+        if (!attachedTitles.containsAll(attachmentRequireList)) return false
 
         // Cannot attach the same attachment multiple times
         return duplicateCount < maximumStackAmount
